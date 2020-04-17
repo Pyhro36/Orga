@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -24,7 +24,7 @@ namespace Orga.Controllers
 
         public IActionResult Index()
         {
-            return View(_configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT"));
+            return View();
         }
 
         public IActionResult Privacy()

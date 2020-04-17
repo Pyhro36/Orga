@@ -102,7 +102,7 @@ namespace Orga.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ArticleExists(article.Id))
+                    if (!await ArticleExists(article.Id))
                     {
                         return NotFound();
                     }
@@ -145,9 +145,9 @@ namespace Orga.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ArticleExists(int id)
+        private async Task<bool> ArticleExists(int id)
         {
-            return _context.Articles.Any(e => e.Id == id);
+            return await _context.Articles.AnyAsync(e => e.Id == id);
         }
     }
 }
