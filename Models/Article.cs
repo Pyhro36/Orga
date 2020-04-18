@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Orga.Models
 {
     /// <summary>
@@ -15,6 +17,7 @@ namespace Orga.Models
         /// Le nom de l'article
         /// </summary>
         /// <value></value>
+        [Display(Name="Nom")]
         public string Name { get; set; }
 
         /// <summary>
@@ -24,21 +27,17 @@ namespace Orga.Models
         public string ImageReference { get; set; }
 
         /// <summary>
-        /// Le nombre d'articles disponibles
-        /// </summary>
-        /// <value></value>
-        public int AvailableQuantity { get; set; }
-
-        /// <summary>
         /// La marque productrice de l'article
         /// </summary>
         /// <value></value>
+        [Display(Name="Marque")]
         public Brand Brand { get; set; }
 
         /// <summary>
         /// La marque productrice de l'article
         /// </summary>
         /// <value></value>
+        [Display(Name="Catégorie")]
         public Category Category { get; set; }
     }
 }

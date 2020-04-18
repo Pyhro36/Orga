@@ -1,16 +1,16 @@
 @model Orga.Models.Article
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Modifier";
 }
 
-<h1>Edit</h1>
+<h1>@Html.DisplayTextFor(model => model.Name)</h1>
 
-<h4>Article</h4>
-<hr />
+<h4>Modifier</h4>
+<hr>
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
+    <div class="col-md-9 row">
+        <form asp-action="Edit" class="col-md-7">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <input type="hidden" asp-for="Id" />
@@ -20,28 +20,16 @@
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-
-            <div class="form-group">
-                <label asp-for="ImageReference" class="control-label"></label>
-                <input asp-for="ImageReference" class="form-control" />
-                <span asp-validation-for="ImageReference" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="AvailableQuantity" class="control-label"></label>
-                <input asp-for="AvailableQuantity" class="form-control" />
-                <span asp-validation-for="AvailableQuantity" class="text-danger"></span>
-            </div>
             
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Enregistrer" class="btn btn-primary" />
             </div>
         </form>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+    <div class="col-md-3">
+        <a asp-action="Index">Retourner à la liste des articles</a>
+    </div>
 </div>
 
 @section Scripts {

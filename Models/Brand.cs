@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Orga.Models
 {
 
@@ -15,6 +17,7 @@ namespace Orga.Models
         /// Nom de la marque
         /// </summary>
         /// <value></value>
+        [Display(Name="Nom")]
         public string Name { get; set; }
     }
 }
