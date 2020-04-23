@@ -29,7 +29,7 @@ namespace Orga
             services.AddControllersWithViews();
             services.AddDbContext<MakeupDbContext>(options =>
             {
-                options.UseSqlite(Configuration.GetConnectionString("MakeupContext"));
+                options.UseNpgsql(Configuration.GetConnectionString("MakeupDb_PostgreSql"));
             });
         }
 

@@ -1,0 +1,13 @@
+{
+    "sqltools.connections": [
+        {
+            "database": "mq_base",
+            "dialect": "PostgreSQL",
+            "name": "mq_base",
+            "password": "TarTaTa",
+            "port": 5432,
+            "server": "localhost",
+            "username": "dev"
+        }
+    ]
+}
