@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Orga.Repository;
@@ -9,9 +10,10 @@ using Orga.Repository;
 namespace Orga.Migrations
 {
     [DbContext(typeof(MakeupDbContext))]
-    partial class MakeupDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200501153213_ArticlePurchaseDate")]
+    partial class ArticlePurchaseDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

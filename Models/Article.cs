@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Orga.Models
@@ -21,9 +22,18 @@ namespace Orga.Models
         public string Name { get; set; }
 
         /// <summary>
+        /// La date d'achat de l'article
+        /// </summary>
+        /// <value></value>
+        [Display(Name="Date d'achat")]
+        [DataType(DataType.Date)]
+        public DateTime PurchaseDate { get; set; }
+
+        /// <summary>
         /// Une référence à l'image de l'article
         /// </summary>
         /// <value></value>
+        [DataType(DataType.ImageUrl)]
         public string ImageReference { get; set; }
 
         /// <summary>

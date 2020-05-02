@@ -54,7 +54,7 @@ namespace Orga.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,ImageReference,AvailableQuantity")] Article article)
+        public async Task<IActionResult> Create([Bind("Id,Name,ImageReference,AvailableQuantity,PurchaseDate")] Article article)
         {
             if (ModelState.IsValid)
             {
