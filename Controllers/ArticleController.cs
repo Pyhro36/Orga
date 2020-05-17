@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Orga.Models;
 using Orga.Repository;
+using Orga.ViewModels;
 
 namespace Orga.Controllers
 {
@@ -46,7 +45,18 @@ namespace Orga.Controllers
         // GET: Article/Create
         public IActionResult Create()
         {
-            return View();
+            var brandQuery =    from b in _context.Brands
+                                orderby b.Name
+                                select b;
+
+            return View(new ArticleEditViewModel { 
+                Brands = new SelectList(
+                    items:          brandQuery.AsNoTracking(),
+                    dataValueField: nameof(Brand.Id),
+                    dataTextField:  nameof(Brand.Name), 
+                    selectedValue:  null
+                )
+            });
         }
 
         // POST: Article/Create
@@ -54,7 +64,12 @@ namespace Orga.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,ImageReference,AvailableQuantity,PurchaseDate")] Article article)
+        public async Task<IActionResult> Create([Bind(
+            nameof(Article.Name),
+            nameof(Article.PurchaseDate),
+            nameof(Article.Brand),
+            "Brand.Id",
+            Prefix = nameof(Article))] Article article)
         {
             if (ModelState.IsValid)
             {
@@ -62,7 +77,8 @@ namespace Orga.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(article);
+            
+            return View(new ArticleEditViewModel());
         }
 
         // GET: Article/Edit/5
@@ -86,7 +102,7 @@ namespace Orga.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ImageReference,AvailableQuantity")] Article article)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,PurchaseDate")] Article article)
         {
             if (id != article.Id)
             {
