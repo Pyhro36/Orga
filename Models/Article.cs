@@ -37,6 +37,12 @@ namespace Orga.Models
         public string ImageReference { get; set; }
 
         /// <summary>
+        /// L'ID de la marque productrice de l'article
+        /// </summary>
+        /// <value></value>
+        public int BrandId { get; set; }
+
+        /// <summary>
         /// La marque productrice de l'article
         /// </summary>
         /// <value></value>
@@ -44,7 +50,13 @@ namespace Orga.Models
         public Brand Brand { get; set; }
 
         /// <summary>
-        /// La marque productrice de l'article
+        /// L'ID de la catégorie de l'article
+        /// </summary>
+        /// <value></value>
+        public int CategoryId { get; set; }
+
+        /// <summary>
+        /// La catégorie de l'article
         /// </summary>
         /// <value></value>
         [Display(Name="Catégorie")]

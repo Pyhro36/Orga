@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ namespace Orga.Controllers
         // GET: Article
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Articles.ToListAsync());
+            return View(await _context.Articles.Include(a => a.Brand).ToListAsync());
         }
 
         // GET: Article/Details/5
@@ -32,8 +33,7 @@ namespace Orga.Controllers
                 return NotFound();
             }
 
-            var article = await _context.Articles
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var article = await _context.Articles.Include(a => a.Brand).FirstOrDefaultAsync(a => a.Id == id);
             if (article == null)
             {
                 return NotFound();
@@ -45,18 +45,7 @@ namespace Orga.Controllers
         // GET: Article/Create
         public IActionResult Create()
         {
-            var brandQuery =    from b in _context.Brands
-                                orderby b.Name
-                                select b;
-
-            return View(new ArticleEditViewModel { 
-                Brands = new SelectList(
-                    items:          brandQuery.AsNoTracking(),
-                    dataValueField: nameof(Brand.Id),
-                    dataTextField:  nameof(Brand.Name), 
-                    selectedValue:  null
-                )
-            });
+            return View(BuildArticleEditViewModel());
         }
 
         // POST: Article/Create
@@ -67,18 +56,22 @@ namespace Orga.Controllers
         public async Task<IActionResult> Create([Bind(
             nameof(Article.Name),
             nameof(Article.PurchaseDate),
-            nameof(Article.Brand),
-            "Brand.Id",
+            nameof(Article.BrandId),
             Prefix = nameof(Article))] Article article)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(article);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (await _context.Brands.AnyAsync(b => b.Id == article.BrandId))
+                {    
+                        await _context.AddAsync(article);
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index));
+                }
+                
+                return NotFound();
             }
             
-            return View(new ArticleEditViewModel());
+            return View(BuildArticleEditViewModel(article));
         }
 
         // GET: Article/Edit/5
@@ -94,7 +87,8 @@ namespace Orga.Controllers
             {
                 return NotFound();
             }
-            return View(article);
+
+            return View(BuildArticleEditViewModel(article));
         }
 
         // POST: Article/Edit/5
@@ -102,7 +96,11 @@ namespace Orga.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,PurchaseDate")] Article article)
+        public async Task<IActionResult> Edit(int id, [Bind(
+            nameof(Article.Name),
+            nameof(Article.PurchaseDate),
+            nameof(Article.BrandId),
+            Prefix = nameof(Article))] Article article)
         {
             if (id != article.Id)
             {
@@ -127,9 +125,11 @@ namespace Orga.Controllers
                         throw;
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(article);
+
+            return View(BuildArticleEditViewModel(article));
         }
 
         // GET: Article/Delete/5
@@ -164,6 +164,28 @@ namespace Orga.Controllers
         private async Task<bool> ArticleExists(int id)
         {
             return await _context.Articles.AnyAsync(e => e.Id == id);
+        }
+
+        private ArticleEditViewModel BuildArticleEditViewModel(Article article = null)
+        {
+            var brandQuery = from b in _context.Brands
+                             orderby b.Name
+                             select b;
+
+
+            return new ArticleEditViewModel
+            {
+                Article = article ?? new Article {
+                    PurchaseDate = DateTime.Now
+                },
+
+                Brands = new SelectList(
+                    items: brandQuery.AsNoTracking(),
+                    dataValueField: nameof(Brand.Id),
+                    dataTextField: nameof(Brand.Name),
+                    selectedValue: null
+                )
+            };
         }
     }
 }
