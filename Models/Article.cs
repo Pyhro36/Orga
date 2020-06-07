@@ -40,7 +40,7 @@ namespace Orga.Models
         /// L'ID de la marque productrice de l'article
         /// </summary>
         /// <value></value>
-        public int BrandId { get; set; }
+        public int? BrandId { get; set; }
 
         /// <summary>
         /// La marque productrice de l'article
@@ -53,7 +53,7 @@ namespace Orga.Models
         /// L'ID de la catégorie de l'article
         /// </summary>
         /// <value></value>
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
 
         /// <summary>
         /// La catégorie de l'article

@@ -140,8 +140,7 @@ namespace Orga.Controllers
                 return NotFound();
             }
 
-            var article = await _context.Articles
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var article = await _context.Articles.Include(a => a.Brand).FirstOrDefaultAsync(m => m.Id == id);
             if (article == null)
             {
                 return NotFound();
@@ -172,7 +171,6 @@ namespace Orga.Controllers
                              orderby b.Name
                              select b;
 
-
             return new ArticleEditViewModel
             {
                 Article = article ?? new Article {
@@ -183,7 +181,7 @@ namespace Orga.Controllers
                     items: brandQuery.AsNoTracking(),
                     dataValueField: nameof(Brand.Id),
                     dataTextField: nameof(Brand.Name),
-                    selectedValue: null
+                    selectedValue: article?.Id
                 )
             };
         }
