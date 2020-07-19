@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+
+using Orga.Controllers.Builders;
+using Orga.FileAbstraction;
 using Orga.Models;
 using Orga.Repository;
 using Orga.ViewModels;
@@ -14,9 +17,15 @@ namespace Orga.Controllers
     {
         private readonly MakeupDbContext _context;
 
-        public ArticleController(MakeupDbContext context)
+        private readonly ArticleViewModelBuilder _articleViewModelBuilder;
+        private readonly IFileSaveService _fileSaveService;
+
+        public ArticleController(MakeupDbContext context, IFileSaveService fileSaveService)
         {
             _context = context;
+            _fileSaveService = fileSaveService;
+            _articleViewModelBuilder = new ArticleViewModelBuilder(context);
+
         }
 
         // GET: Article
@@ -45,7 +54,7 @@ namespace Orga.Controllers
         // GET: Article/Create
         public IActionResult Create()
         {
-            return View(BuildArticleEditViewModel());
+            return View(_articleViewModelBuilder.BuildArticleViewModel());
         }
 
         // POST: Article/Create
@@ -54,24 +63,33 @@ namespace Orga.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind(
-            nameof(Article.Name),
-            nameof(Article.PurchaseDate),
-            nameof(Article.BrandId),
-            Prefix = nameof(Article))] Article article)
+            nameof(ArticleViewModel.Name),
+            nameof(ArticleViewModel.PurchaseDate),
+            nameof(ArticleViewModel.ImageFile),
+            nameof(ArticleViewModel.BrandId))]
+            ArticleViewModel articleViewModel)
         {
             if (ModelState.IsValid)
             {
-                if (await BrandExists(article.BrandId))
-                {    
-                        await _context.AddAsync(article);
-                        await _context.SaveChangesAsync();
-                        return RedirectToAction(nameof(Index));
+                if (await BrandExists(articleViewModel.BrandId))
+                {
+                    string imageFileName = System.Guid.NewGuid().ToString();
+
+                    await _fileSaveService.SaveAsync(articleViewModel.ImageFile, imageFileName);
+                    await _context.AddAsync(new Article {
+                        Name = articleViewModel.Name,
+                        PurchaseDate = articleViewModel.PurchaseDate,
+                        ImageReference = imageFileName,
+                        BrandId = articleViewModel.BrandId
+                    });
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 
                 return NotFound();
             }
             
-            return View(BuildArticleEditViewModel(article));
+            return View(_articleViewModelBuilder.BuildArticleEditViewModel(articleViewModel));
         }
 
         // GET: Article/Edit/5
@@ -88,7 +106,7 @@ namespace Orga.Controllers
                 return NotFound();
             }
 
-            return View(BuildArticleEditViewModel(article));
+            return View(_articleViewModelBuilder.BuildArticleEditViewModel(article));
         }
 
         // POST: Article/Edit/5
@@ -97,13 +115,13 @@ namespace Orga.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind(
-            nameof(Article.Id),
-            nameof(Article.Name),
-            nameof(Article.PurchaseDate),
-            nameof(Article.BrandId),
-            Prefix = nameof(Article))] Article article)
+            nameof(ArticleEditViewModel.Id),
+            nameof(ArticleEditViewModel.Name),
+            nameof(ArticleEditViewModel.PurchaseDate),
+            nameof(ArticleEditViewModel.BrandId))]
+            ArticleEditViewModel articleEditViewModel)
         {
-            if (id != article.Id)
+            if (id != articleEditViewModel.Id)
             {
                 return NotFound();
             }
@@ -112,12 +130,12 @@ namespace Orga.Controllers
             {
                 try
                 {
-                    _context.Update(article);
+                    _context.Update(articleEditViewModel);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if ((!await ArticleExists(article.Id)) || (!await BrandExists(article.BrandId)))
+                    if ((!await ArticleExists(articleEditViewModel.Id)) || (!await BrandExists(articleEditViewModel.BrandId)))
                     {
                         return NotFound();
                     }
@@ -130,7 +148,7 @@ namespace Orga.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(BuildArticleEditViewModel(article));
+            return View(articleEditViewModel);
         }
 
         // GET: Article/Delete/5
@@ -184,32 +202,6 @@ namespace Orga.Controllers
             {
                 return true;
             }
-        }
-
-        /// <summary>
-        /// Crée le Modèle de vue pour l'édition (ou la création) d'article en y incluant la liste des marques
-        /// </summary>
-        /// <param name="article">L'article à éditer, indiquer à null pour un nouvel article</param>
-        /// <returns>Le modèle de vue pour l'édition (ou la création) d'article</returns>
-        private ArticleEditViewModel BuildArticleEditViewModel(Article article = null)
-        {
-            var brandQuery = from b in _context.Brands
-                             orderby b.Name
-                             select b;
-
-            return new ArticleEditViewModel
-            {
-                Article = article ?? new Article {
-                    PurchaseDate = DateTime.Now
-                },
-
-                Brands = new SelectList(
-                    items: brandQuery.AsNoTracking(),
-                    dataValueField: nameof(Brand.Id),
-                    dataTextField: nameof(Brand.Name),
-                    selectedValue: article?.Id
-                )
-            };
         }
 
         /// <summary>

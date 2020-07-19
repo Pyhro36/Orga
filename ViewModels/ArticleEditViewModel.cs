@@ -1,21 +1,23 @@
+using System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 using Orga.Models;
 
 namespace Orga.ViewModels
 {
-    public class ArticleEditViewModel
+    public class ArticleEditViewModel : ArticleViewModel
     {   
         /// <summary>
-        /// L'article à créer/éditer
+        /// l'ID de l'article
         /// </summary>
         /// <value></value>
-        public Article Article { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
-        /// La liste marques à choisir
+        /// Le chemin vers le fichier de l'image
         /// </summary>
         /// <value></value>
-        public SelectList Brands { get; set; }
+        public string ImageUrl { get; set; }
     }
 }

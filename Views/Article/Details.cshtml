@@ -9,6 +9,9 @@
 <div>
     <h4>@Html.DisplayTextFor(model => model.Name)</h4>
     <hr />
+
+    <picture class="img-fluid img-thumbnail" org-name="@Html.DisplayTextFor(model => model.ImageReference)">
+        
     <dl class="row">
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Name)
