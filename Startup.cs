@@ -1,15 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 
 using Orga.Repository;
-using Microsoft.Extensions.FileProviders;
-using Orga.FileAbstraction;
-using Orga.FileImpl;
 
 namespace Orga
 {
@@ -30,8 +26,6 @@ namespace Orga
             {
                 options.UseNpgsql(Configuration.GetConnectionString("MakeupDb_PostgreSql"));
             });
-
-            services.AddSingleton<IFileSaveService,FileSaveService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,12 +43,6 @@ namespace Orga
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Configuration.GetValue<string>(Constants.VAR_ROOT_DIR_KEY)),
-                RequestPath = Constants.VARIABLE_CONTENT_URL_PATH
-            });
 
             app.UseRouting();
 

@@ -12,5 +12,7 @@ namespace Orga.Repository
         public DbSet<Brand> Brands { get; set; }
 
         public DbSet<Category> Categories { get; set; }
+
+        public DbSet<ImageData> ImageDatas { get; set; }
     }
 }

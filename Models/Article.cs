@@ -30,11 +30,16 @@ namespace Orga.Models
         public DateTime PurchaseDate { get; set; }
 
         /// <summary>
-        /// Une référence à l'image de l'article
+        /// L'ID de l'image de l'article
         /// </summary>
         /// <value></value>
+        public int? ImageId { get; set; }
+
+        /// <summary>
+        /// L'image de l'article
+        /// </summary>
         [DataType(DataType.ImageUrl)]
-        public string ImageReference { get; set; }
+        public ImageData Image { get; set; }
 
         /// <summary>
         /// L'ID de la marque productrice de l'article

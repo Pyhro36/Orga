@@ -1,12 +1,9 @@
-using System;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 using Orga.Controllers.Builders;
-using Orga.FileAbstraction;
 using Orga.Models;
 using Orga.Repository;
 using Orga.ViewModels;
@@ -14,16 +11,14 @@ using Orga.ViewModels;
 namespace Orga.Controllers
 {
     public class ArticleController : Controller
-    {
+    {        
         private readonly MakeupDbContext _context;
 
         private readonly ArticleViewModelBuilder _articleViewModelBuilder;
-        private readonly IFileSaveService _fileSaveService;
 
-        public ArticleController(MakeupDbContext context, IFileSaveService fileSaveService)
+        public ArticleController(MakeupDbContext context)
         {
             _context = context;
-            _fileSaveService = fileSaveService;
             _articleViewModelBuilder = new ArticleViewModelBuilder(context);
 
         }
@@ -73,15 +68,22 @@ namespace Orga.Controllers
             {
                 if (await BrandExists(articleViewModel.BrandId))
                 {
-                    string imageFileName = System.Guid.NewGuid().ToString();
+                    using (Stream imageStream = articleViewModel.ImageFile.OpenReadStream())
+                    {
+                        byte[] imageData = new byte[imageStream.Length];
+                        await imageStream.ReadAsync(imageData, 0, imageData.Length);
 
-                    await _fileSaveService.SaveAsync(articleViewModel.ImageFile, imageFileName);
-                    await _context.AddAsync(new Article {
-                        Name = articleViewModel.Name,
-                        PurchaseDate = articleViewModel.PurchaseDate,
-                        ImageReference = imageFileName,
-                        BrandId = articleViewModel.BrandId
-                    });
+                        await _context.AddAsync(new Article
+                        {
+                            Name = articleViewModel.Name,
+                            PurchaseDate = articleViewModel.PurchaseDate,
+                            BrandId = articleViewModel.BrandId,
+                            Image = new ImageData {
+                                Data = imageData
+                            }
+                        });
+                    }
+
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }

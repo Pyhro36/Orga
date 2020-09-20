@@ -10,8 +10,8 @@ using Orga.Repository;
 namespace Orga.Migrations
 {
     [DbContext(typeof(MakeupDbContext))]
-    [Migration("20200501153213_ArticlePurchaseDate")]
-    partial class ArticlePurchaseDate
+    [Migration("20200908184327_AddImageData")]
+    partial class AddImageData
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,8 +34,8 @@ namespace Orga.Migrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("ImageReference")
-                        .HasColumnType("text");
+                    b.Property<int?>("ImageId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -48,6 +48,8 @@ namespace Orga.Migrations
                     b.HasIndex("BrandId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("ImageId");
 
                     b.ToTable("Articles");
                 });
@@ -82,15 +84,34 @@ namespace Orga.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Orga.Models.ImageData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<byte[]>("Data")
+                        .HasColumnType("bytea");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ImageDatas");
+                });
+
             modelBuilder.Entity("Orga.Models.Article", b =>
                 {
                     b.HasOne("Orga.Models.Brand", "Brand")
-                        .WithMany()
+                        .WithMany("Articles")
                         .HasForeignKey("BrandId");
 
                     b.HasOne("Orga.Models.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId");
+
+                    b.HasOne("Orga.Models.ImageData", "Image")
+                        .WithMany()
+                        .HasForeignKey("ImageId");
                 });
 #pragma warning restore 612, 618
         }
