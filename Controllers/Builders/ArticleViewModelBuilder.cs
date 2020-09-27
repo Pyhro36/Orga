@@ -59,8 +59,8 @@ namespace Orga.Controllers.Builders
             return new ArticleEditViewModel
             {
                 Name = article.Name,
-
                 PurchaseDate = article.PurchaseDate,
+                ImageId = article.ImageId,
 
                 Brands = new SelectList(
                     items: GetBrandList(),

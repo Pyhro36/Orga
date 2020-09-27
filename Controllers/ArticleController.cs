@@ -120,6 +120,7 @@ namespace Orga.Controllers
             nameof(ArticleEditViewModel.Id),
             nameof(ArticleEditViewModel.Name),
             nameof(ArticleEditViewModel.PurchaseDate),
+            nameof(ArticleEditViewModel.ImageFile),
             nameof(ArticleEditViewModel.BrandId))]
             ArticleEditViewModel articleEditViewModel)
         {
@@ -130,6 +131,21 @@ namespace Orga.Controllers
 
             if (ModelState.IsValid)
             {
+                // Si on demande à modifier l'image
+                if (articleEditViewModel.ImageFile != null)
+                {
+                    // On supprime la précédente si elle existe
+                    if (articleEditViewModel.ImageId != null)
+                    {
+                        var oldImage = await _context.ImageDatas.FindAsync(articleEditViewModel.ImageId);
+                        
+                        if (oldImage != null)
+                        {
+                            _context.ImageDatas.Remove(oldImage);
+                        }
+                    }
+                }
+
                 try
                 {
                     _context.Update(articleEditViewModel);
@@ -147,7 +163,7 @@ namespace Orga.Controllers
                     }
                 }
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Details), articleEditViewModel.Id);
             }
 
             return View(articleEditViewModel);

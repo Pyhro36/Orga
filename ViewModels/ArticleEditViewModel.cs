@@ -15,9 +15,9 @@ namespace Orga.ViewModels
         public int Id { get; set; }
 
         /// <summary>
-        /// Le chemin vers le fichier de l'image
+        /// L'ID de l'image de l'article
         /// </summary>
         /// <value></value>
-        public string ImageUrl { get; set; }
+        public int? ImageId { get; set; }
     }
 }

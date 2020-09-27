@@ -13,6 +13,8 @@
         <form asp-action="Edit" class="col-md-7">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+            <partial name="_SavedImagePartial" for="ImageId" style="max-height: 400px">
+
             <input type="hidden" asp-for="Id" />
 
             <div class="form-group">

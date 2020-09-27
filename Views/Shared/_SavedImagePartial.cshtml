@@ -1,3 +1,6 @@
-@model int // l'ID de sauvegarde de l'image
+@model int? // l'ID de sauvegarde de l'image
 
-<img class="img-fluid d-inline-block my-4 img-thumbnail" src="~/Image/Get/@Model">
+@if (Model != null)
+{
+    <img class="img-fluid d-inline-block my-4 img-thumbnail" src="~/Image/Get/@Model">
+}
