@@ -10,11 +10,11 @@
 <hr>
 <div>
     <div class="row">
-        <form asp-action="Edit" class="col-md-7">
+        <form asp-action="Edit" class="col-md-7" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <partial name="_SavedImagePartial" for="ImageId">
-
+ 
             <input type="hidden" asp-for="Id" />
 
             <partial name="_EditFieldsPartial">

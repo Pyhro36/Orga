@@ -12,6 +12,7 @@ namespace Orga.Controllers.Builders
     internal class ArticleViewModelBuilder
     {
         private readonly MakeupDbContext _context;
+        
         internal ArticleViewModelBuilder(MakeupDbContext context)
         {
             this._context = context;

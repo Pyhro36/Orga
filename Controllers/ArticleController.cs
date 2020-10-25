@@ -38,7 +38,7 @@ namespace Orga.Controllers
                 return NotFound();
             }
 
-            Article article = await ArticleWithBrand(id.Value);
+            Article article = await GetArticleWithBrand(id.Value);
             if (article == null)
             {
                 return NotFound();
@@ -106,6 +106,7 @@ namespace Orga.Controllers
             }
 
             var article = await _context.Articles.FindAsync(id);
+            
             if (article == null)
             {
                 return NotFound();
@@ -134,8 +135,7 @@ namespace Orga.Controllers
 
             if (ModelState.IsValid)
             {
-                // Connexion à l'article à modifier
-                var article = await _context.Articles.Include(a => a.Image).FirstOrDefaultAsync(a => a.Id == id);
+                Article article = await GetArticleWithImage(id);
 
                 if ((article != null) && (await BrandExists(articleEditViewModel.BrandId)))
                 {
@@ -169,7 +169,7 @@ namespace Orga.Controllers
                 {
                     return NotFound();
                 }
-                
+
                 return RedirectToAction(nameof(Details), new { Id = articleEditViewModel.Id });
             }
 
@@ -184,7 +184,7 @@ namespace Orga.Controllers
                 return NotFound();
             }
 
-            var article = await ArticleWithBrand(id.Value);
+            var article = await GetArticleWithBrand(id.Value);
             if (article == null)
             {
                 return NotFound();
@@ -198,8 +198,11 @@ namespace Orga.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var article = await _context.Articles.FindAsync(id);
+            var article = await GetArticleWithImage(id);
+
             _context.Articles.Remove(article);
+            _context.ImageDatas.Remove(article.Image);
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -207,16 +210,16 @@ namespace Orga.Controllers
         /// <summary>
         /// Cherche dans le contexte de DB si l'article dont l'ID est donné en paramètre existe
         /// </summary>
-        /// <param name="id">l'ID de l'article</param>
-        /// <returns>vrai si l'ID existe dans le contexte, faux sinon</returns>
+        /// <param name="id">L'ID de l'article</param>
+        /// <returns>Vrai si l'ID existe dans le contexte, faux sinon</returns>
         private async Task<bool> ArticleExists(int id) => await _context.Articles.AnyAsync(a => a.Id == id);
 
         /// <summary>
         /// Cherche dans le contexte de DB si la marque dont l'ID est donné en paramètre existe, ou retourne
         /// vrai si l'ID est null
         /// </summary>
-        /// <param name="id">l'ID de la marque ou null</param>
-        /// <returns>vrai si l'ID est null ou si la marque existe dans le contexte, faux sinon</returns>
+        /// <param name="id">L'ID de la marque ou null</param>
+        /// <returns>Vrai si l'ID est null ou si la marque existe dans le contexte, faux sinon</returns>
         private async Task<bool> BrandExists(int? id)
         {
             if (id != null)
@@ -232,9 +235,18 @@ namespace Orga.Controllers
         /// <summary>
         /// Récupère l'article dont l'ID est passé en paramètre avec la marque associée
         /// </summary>
-        /// <param name="id">l'ID de l'arcticle</param>
-        /// <returns>l'article dont l'ID est passé en paramètre avec la marque associée</returns>
-        private async Task<Article> ArticleWithBrand(int id) => await _context.Articles.Include(a => a.Brand).FirstOrDefaultAsync(a => a.Id == id);
+        /// <param name="id">L'ID de l'arcticle</param>
+        /// <returns>L'article dont l'ID est passé en paramètre avec la marque associée</returns>
+        private async Task<Article> GetArticleWithBrand(int id) =>
+                await _context.Articles.Include(a => a.Brand).FirstOrDefaultAsync(a => a.Id == id);
+
+        /// <summary>
+        /// récupère l'article dont l'ID est passé en paramètre avec l'image associée s'il y en a une
+        /// </summary>
+        /// <param name="id">L'ID de l'article</param>
+        /// <returns>L'article dont l'ID est passé en paramètre avec l'image associée s'il y en a une</returns>
+        private async Task<Article> GetArticleWithImage(int id) =>
+                await _context.Articles.Include(a => a.Image).FirstOrDefaultAsync(a => a.Id == id);
 
         /// <summary>
         /// Extrait d'un fichier téléversé ses données
