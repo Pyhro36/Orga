@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -68,26 +69,28 @@ namespace Orga.Controllers
             {
                 if (await BrandExists(articleViewModel.BrandId))
                 {
-                    using (Stream imageStream = articleViewModel.ImageFile.OpenReadStream())
-                    {
-                        byte[] imageData = new byte[imageStream.Length];
-                        await imageStream.ReadAsync(imageData, 0, imageData.Length);
+                    ImageData image = null;
 
-                        await _context.AddAsync(new Article
+                    if (articleViewModel.ImageFile != null)
+                    {
+                        image = new ImageData
                         {
-                            Name = articleViewModel.Name,
-                            PurchaseDate = articleViewModel.PurchaseDate,
-                            BrandId = articleViewModel.BrandId,
-                            Image = new ImageData {
-                                Data = imageData
-                            }
-                        });
+                            Data = await ExtractData(articleViewModel.ImageFile)
+                        };
                     }
+                    
+                    await _context.AddAsync(new Article
+                    {
+                        Name = articleViewModel.Name,
+                        PurchaseDate = articleViewModel.PurchaseDate,
+                        BrandId = articleViewModel.BrandId,
+                        Image = image
+                    });
 
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
-                
+
                 return NotFound();
             }
             
@@ -131,39 +134,43 @@ namespace Orga.Controllers
 
             if (ModelState.IsValid)
             {
-                // Si on demande à modifier l'image
-                if (articleEditViewModel.ImageFile != null)
+                // Connexion à l'article à modifier
+                var article = await _context.Articles.Include(a => a.Image).FirstOrDefaultAsync(a => a.Id == id);
+
+                if ((article != null) && (await BrandExists(articleEditViewModel.BrandId)))
                 {
-                    // On supprime la précédente si elle existe
-                    if (articleEditViewModel.ImageId != null)
+                    article.Name = articleEditViewModel.Name;
+                    article.PurchaseDate = articleEditViewModel.PurchaseDate;
+                    article.BrandId = articleEditViewModel.BrandId;
+
+                    // Si l'image est ajoutée ou modifiée
+                    if (articleEditViewModel.ImageFile != null)
                     {
-                        var oldImage = await _context.ImageDatas.FindAsync(articleEditViewModel.ImageId);
-                        
-                        if (oldImage != null)
+                        article.Image.Data = await ExtractData(articleEditViewModel.ImageFile);
+                    }
+
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if ((!await ArticleExists(articleEditViewModel.Id)) || (!await BrandExists(articleEditViewModel.BrandId)))
                         {
-                            _context.ImageDatas.Remove(oldImage);
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
                         }
                     }
                 }
-
-                try
+                else
                 {
-                    _context.Update(articleEditViewModel);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if ((!await ArticleExists(articleEditViewModel.Id)) || (!await BrandExists(articleEditViewModel.BrandId)))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                return RedirectToAction(nameof(Details), articleEditViewModel.Id);
+                
+                return RedirectToAction(nameof(Details), new { Id = articleEditViewModel.Id });
             }
 
             return View(articleEditViewModel);
@@ -228,5 +235,20 @@ namespace Orga.Controllers
         /// <param name="id">l'ID de l'arcticle</param>
         /// <returns>l'article dont l'ID est passé en paramètre avec la marque associée</returns>
         private async Task<Article> ArticleWithBrand(int id) => await _context.Articles.Include(a => a.Brand).FirstOrDefaultAsync(a => a.Id == id);
+
+        /// <summary>
+        /// Extrait d'un fichier téléversé ses données
+        /// </summary>
+        /// <param name="file">Le fichier d'où extraire les données</param>
+        /// <returns>Un tableau de byte contenant le binaire du fichier</returns>
+        private static async Task<byte[]> ExtractData(IFormFile file)
+        {
+            using(Stream fileStream = file.OpenReadStream())
+            {
+                byte[] data = new byte[fileStream.Length];
+                await fileStream.ReadAsync(data, 0, data.Length);
+                return data;
+            }
+        }
     }
 }

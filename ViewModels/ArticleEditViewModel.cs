@@ -15,7 +15,7 @@ namespace Orga.ViewModels
         public int Id { get; set; }
 
         /// <summary>
-        /// L'ID de l'image de l'article
+        /// L'ID de l'image actuelle de l'article
         /// </summary>
         /// <value></value>
         public int? ImageId { get; set; }
