@@ -113,7 +113,8 @@ RID : dotnet --info
 
 - générer avec RID pour CentOS 7(.8)
 
-en local dans le dossier de développement
+en local dans le dossier de développement, créer et pousser l'archive sur
+le serveur
 ```bash
 dotnet publish -c Release -r 'centos.7-x64' --self-contained false
 cd /home/pierre-louis/projects/Orga/bin/Release/netcoreapp3.1/centos.7-x64/publish
@@ -122,7 +123,8 @@ tar -czvf orga-<version>.tar.gz *
 scp orga-<version>.tar 130.61.248.20:~
 ```
 
-Sur le serveur
+Sur le serveur, poser les fichiers d'application et leur mettre les bon
+droits
 
 en root
 ```bash
@@ -136,6 +138,8 @@ ln -s orga-<version> orga
 chown -R orga-adm:orga orga-0.1.0
 chown orga-adm:orga orga
 ```
+
+
 
 ## Migrer la base de données
 
