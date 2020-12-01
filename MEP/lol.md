@@ -120,7 +120,7 @@ dotnet publish -c Release -r 'centos.7-x64' --self-contained false
 cd /home/pierre-louis/projects/Orga/bin/Release/netcoreapp3.1/centos.7-x64/publish
 rm appsettings.Development.json
 tar -czvf orga-<version>.tar.gz *
-scp orga-<version>.tar 130.61.248.20:~
+scp orga-<version>.tar.gz 130.61.248.20:~
 ```
 
 Sur le serveur, poser les fichiers d'application et leur mettre les bon
